@@ -72,12 +72,15 @@ export default function AddUnit() {
     const [applicationsList, setApplicationsList] = useState([]);
 
     const setDefaultAppList = () => {
+        const linked_apps = [];
         state.loginData.appList.map((app, index) => {
             if (app.essential) {
-                const defaultApp = applicationsList.push(app);
-                setApplicationsList(...applicationsList, defaultApp);
+                linked_apps.push(app);
+                // const defaultApp = applicationsList.push(app);
+                // setApplicationsList(...applicationsList, defaultApp);
             }
         });
+        return linked_apps;
     };
 
     const getAllOrgAdmin = async () => {
@@ -102,7 +105,6 @@ export default function AddUnit() {
             }
 
             if (unitDetails.unit_type === 'CONSUMER_UNIT') {
-                setDefaultAppList();
             }
 
             if (unitDetails.unit_type === 'MONITORING_UNIT') {
@@ -112,7 +114,8 @@ export default function AddUnit() {
                     dispatch(showSnackbar({ open: true, severity: 'success', message: 'Monitoring Unit Created!!' }));
                 }
             } else {
-                const response = await axiosInstance.post('/unit/create-cu', { ...unitDetails, linked_apps: applicationsList });
+                const linked_apps = setDefaultAppList();
+                const response = await axiosInstance.post('/unit/create-cu', { ...unitDetails, linked_apps });
                 if (response.status === 200) {
                     // alert("Unit created successfully!");
                     dispatch(showSnackbar({ open: true, severity: 'success', message: 'Consumer Unit Created!!' }));
@@ -128,7 +131,7 @@ export default function AddUnit() {
             });
             setSelectedOrganization({ id: '', name: '' });
             setSelectedMU({ id: '', name: '' });
-        } catch (error) {}
+        } catch (error) { }
     };
 
     const handleOrgChange = async event => {
